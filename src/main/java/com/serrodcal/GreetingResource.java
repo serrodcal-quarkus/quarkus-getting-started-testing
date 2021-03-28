@@ -1,16 +1,27 @@
 package com.serrodcal;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import io.quarkus.vertx.web.Param;
+import io.quarkus.vertx.web.Route;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.web.RoutingContext;
 
-@Path("/hello-resteasy")
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class GreetingResource {
 
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String hello() {
-        return "Hello RESTEasy";
+    @Inject
+    GreetingService greetingService;
+
+    @Route(path = "hello", methods = HttpMethod.GET, produces = "text/plain" )
+    public void hello(RoutingContext rc) {
+        rc.response().end("Hello");
     }
+
+    @Route(path = "greeting/:name", methods = HttpMethod.GET, produces = "text/plain")
+    public void greeting(RoutingContext rc, @Param("name") String name) {
+        greetingService.greet(name).subscribe().with(result -> rc.response().end(result));
+    }
+
 }
